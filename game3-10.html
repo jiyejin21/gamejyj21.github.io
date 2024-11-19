@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>game3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 90vh;
+            position: relative;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('imageC/0.png');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        #stage {
+            font-size: 24px; 
+        }
+
+        #return-button, #next-stage-button {
+            position: absolute;
+            cursor: pointer;
+            display: none;
+        }
+
+    #gift {
+        position: absolute;
+        cursor: pointer;
+        display: block;
+    }
+    
+    .block {
+            position: absolute;
+            cursor: move;
+        }
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <img id="loading-image" src="imageC/0-1.png" alt="로딩 이미지" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; display: block;">
+
+        <img id="gift" src="imageC/gift.png" alt="gift 이미지">
+        <img id="blockA" class="block" src="imageC/bag1.png" alt="A 이미지">
+        <img id="blockB" class="block" src="imageC/bag2.png" alt="B 이미지">
+        <img id="blockC" class="block" src="imageC/bag3.png" alt="C 이미지">
+        <img id="blockD" class="block" src="imageC/bag4.png" alt="D 이미지">
+        <img id="blockE" class="block" src="imageC/bag5.png" alt="E 이미지">
+        <img id="blockF" class="block" src="imageC/bag6.png" alt="F 이미지">
+        <img id="blockG" class="block" src="imageC/bag7.png" alt="G 이미지">
+        <img id="blockH" class="block" src="imageC/bag8.png" alt="H 이미지">
+        <img id="blockI" class="block" src="imageC/bag9.png" alt="I 이미지">
+    </div>
+
+    <div id="lives" style="position: absolute; top: 5%; left: 15%;  color: white;">❤️❤️❤️</div>
+    <div id="stage" style="position: absolute; top: 5%; right: 15%;  color: white;">⭐</div>
+    <div id="timer-bar" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 80%; height: 10px; background-color: rgb(61, 61, 61);">
+        <div id="timer-fill" style="width: 100%; height: 100%; background-color: rgb(255, 255, 255);"></div>
+    </div>
+    <button id="return-button" style="display: none; position: absolute; top: 45%; left: 50%; background-color: white; transform: translate(-50%, -50%); padding: 10px 20px; font-size: 18px;">다시하기</button>
+    <button id="next-stage-button" style="display: none; position: absolute; top: 55%; left: 50%; background-color: white; transform: translate(-50%, -50%); padding: 10px 20px; font-size: 18px;">더 망치러 가기</button>
+    
+    <script>
+
+        let lives = 3;
+        let iconCount = 3;
+        let stageCount = 1;
+        let timerInterval;
+
+        const blocks = document.querySelectorAll('.block');
+    
+        blocks.forEach(block => {
+    block.addEventListener('click', () => {
+        const randomX = Math.random() * 50 + '%'; 
+        const randomY = Math.random() * 50 + '%'; 
+        block.style.left = randomX;
+        block.style.top = randomY;
+    });
+});
+
+    const gift = document.getElementById('gift');
+        gift.addEventListener('click', () => {
+            stageCount++;
+            updateStage();
+
+            randomizeGift();
+
+            if (stageCount >= 10) {
+                showNextStageButton();
+            } else {
+                resetTimer();
+                startGame();
+            }
+        });
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            startTimer();
+        }
+
+        gift.style.display = 'block'; 
+
+        function randomizeBlocks() {
+    blocks.forEach(block => {
+        const randomX = Math.random() * (400 - block.clientWidth) + 20; 
+        const randomY = Math.random() * (400 - block.clientHeight) + 20; 
+        block.style.left = `${randomX}px`;
+        block.style.top = `${randomY}px`;
+    });
+}
+
+function randomizeBlocksNearGift() {
+    const giftRect = gift.getBoundingClientRect();
+    blocks.forEach(block => {
+        const randomX = giftRect.left + Math.random() * 50 - 20; 
+        const randomY = giftRect.top + Math.random() * 50 - 50;
+        block.style.left = `${randomX}px`;
+        block.style.top = `${randomY}px`;
+    });
+}
+
+randomizeBlocksNearGift();
+
+function randomizeGift() {
+    const gift = document.getElementById('gift');
+    const container = document.getElementById('game-container');
+
+    // 컨테이너와 gift 크기 가져오기
+    const containerRect = container.getBoundingClientRect();
+    const giftRect = gift.getBoundingClientRect();
+
+    // 좌표 범위 계산 (컨테이너 안에서 gift 이미지가 반 이상 보이게)
+    const minX = 0;  // gift가 컨테이너 안에 위치하도록 조정된 X 최소값
+    const maxX = containerRect.width - giftRect.width * 0.5;
+    const minY = 0;  // gift가 컨테이너 안에 위치하도록 조정된 Y 최소값
+    const maxY = containerRect.height - giftRect.height * 0.5;
+
+    // 랜덤 위치 설정 (gift 이미지의 절반 이상 보이도록)
+    const randomX = Math.random() * (maxX - minX) + minX;
+    const randomY = Math.random() * (maxY - minY) + minY;
+
+    // 계산된 좌표 적용
+    gift.style.left = `${randomX}px`;
+    gift.style.top = `${randomY}px`;
+
+    // 블록들도 gift 주변에 재배치
+    randomizeBlocksNearGift();
+}
+
+randomizeGift();
+
+
+        startTimer();
+
+        function startTimer() {
+            randomizeBlocks(); 
+            const timerFill = document.getElementById('timer-fill');
+            let timeLeft = 100;
+            timerFill.style.width = '100%';
+
+            clearInterval(timerInterval); 
+            timerInterval = setInterval(() => {
+                timeLeft -= 2;
+                timerFill.style.width = `${timeLeft}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    loseLife();
+                }
+            }, 50);
+        }
+
+        function loseLife() {
+            lives -= 1;
+            updateLives();
+            if (lives > 0) {
+                startTimer();
+                createIcons(iconCount);
+            } else {
+                endGame();
+            }
+        }
+
+        function updateLives() {
+            const livesElement = document.getElementById('lives');
+            livesElement.textContent = '❤️'.repeat(lives);
+        }
+
+        function endGame() {
+    clearInterval(timerInterval);
+
+document.getElementById('game-container').style.pointerEvents = 'none';
+
+const returnButton = document.getElementById('return-button');
+if (stageCount >= 5) {
+    returnButton.textContent = '또 선물 찾기'
+} else {
+    returnButton.textContent = '다시하기'
+}
+returnButton.style.display = 'block';
+returnButton.onclick = () => {
+    location.reload();
+};
+
+const nextStageButton = document.getElementById('next-stage-button');
+
+if (stageCount >= 5) {
+    nextStageButton.textContent = '다른 물건 망치기';
+    nextStageButton.onclick = () => {
+        window.location.href = 'game0-13.html';
+    };
+} else {
+    nextStageButton.textContent = '돌아가기';
+    nextStageButton.onclick = () => {
+        window.location.href = 'game0-10.html'
+    };
+}
+returnButton.style.display = 'block';
+nextStageButton.style.display = 'block';
+}
+
+function updateStage() {document.getElementById('stage').textContent = '⭐'.repeat(stageCount);
+}
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const loadingImage = document.getElementById('loading-image');
+
+    // 3초 후 로딩 이미지를 숨기고 게임 시작
+    setTimeout(() => {
+        loadingImage.style.display = 'none'; // 로딩 이미지를 숨김
+        startGame(); // 게임 시작
+    }, 3000);  // 3초 후
+});
+
+function startGame() {
+    resetGame(); // 초기 게임 설정
+    startTimer(); // 타이머 시작
+    document.getElementById('game-container').style.pointerEvents = 'auto'; // 게임 시작 후 마우스 이벤트 활성화
+}
+
+function startTimer() {
+            randomizeBlocks(); 
+            const timerFill = document.getElementById('timer-fill');
+            let timeLeft = 100;
+            timerFill.style.width = '100%';
+
+            clearInterval(timerInterval); 
+            if (document.getElementById('loading-image').style.display === 'none') {
+            timerInterval = setInterval(() => {
+                timeLeft -= 2;
+                timerFill.style.width = `${timeLeft}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    loseLife();
+                }
+            }, 50);
+        }
+        }
+    </script>
+</body>
+</html>

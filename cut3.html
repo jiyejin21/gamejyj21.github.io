@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부러워?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 90vh;
+            position: relative;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: absolute;
+            width: 500px; 
+            height: 500px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;  
+            background-position: center;  
+        }
+
+        #why-button {
+            position: absolute;
+            bottom: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease; 
+        }
+
+        #why-button:hover {
+            transform: scale(1.3);
+        }
+
+        @keyframes slideDown1 {
+            from {
+                transform: translateX(15%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideDown11 {
+            from {
+                transform: translateX(-15%);
+                opacity: 0;
+                visibility: visible;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        @keyframes slideDown2 {
+            from {
+                transform: translateY(15%);
+                opacity: 0;
+                visibility: visible;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        img[alt="back1"] {
+            animation: slideDown1 1s ease-out forwards;
+        }
+        img[alt="back1eng"] {
+            animation: slideDown11 1s ease-out forwards;
+            animation-delay: 1s;
+            visibility: hidden; 
+        }
+        img[alt="back2"] {
+            animation: slideDown2 1s ease-out forwards;
+            animation-delay: 2s;
+            visibility: hidden; 
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(0px) scale(1.3); }
+            
+        }
+        .bounce {
+            animation: bounce 0.5s ease;
+        }
+        .back2heung {
+            visibility: hidden; 
+            opacity: 0;         
+            transition: visibility 0s 3s, opacity 0.5s ease-in 2s; 
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <img src="image/3-01.png" alt="back1" style="position: absolute;">
+        <img src="image/3-01eng.png" alt="back1eng" style="position: absolute;">
+        <img src="image/3-01cha.png" alt="back1" style="position: absolute;">
+        <img src="image/3-02.png" alt="back2" style="position: absolute;">
+        <img src="image/3-02heung.png" class="back2heung" style="position: absolute; top: 421px; left: 415px;">
+    </div>
+    
+    <button id="why-button" onclick="goToCut2()">부러워?</button>
+
+    <script>
+        function goToCut2() {
+            window.location.href = "cut4.html";
+        }
+
+        const images = document.querySelectorAll('.back2heung');
+
+        function animateImages() {
+        images.forEach((img, index) => {
+            setTimeout(() => {
+                img.style.visibility = "visible"; 
+                img.style.opacity = "1";
+                img.classList.add('bounce');
+                img.addEventListener('animationend', () => img.classList.remove('bounce'));
+            }, index * 50); 
+        });
+        }
+
+        animateImages();
+
+        setInterval(animateImages, images.length * 100 + 3000);
+    </script>
+</body>
+</html>
